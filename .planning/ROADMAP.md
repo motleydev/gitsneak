@@ -27,12 +27,11 @@ GitSneak transforms GitHub repository URLs into organizational intelligence repo
   3. User receives clear error messages when something fails (invalid URL, network error)
   4. Repeated runs for the same users hit local cache instead of GitHub
   5. Tool respects rate limits with automatic backoff (no IP blocks)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md — Project setup, TypeScript config, CLI skeleton with all flags
+- [ ] 01-02-PLAN.md — HTTP client with retry logic, SQLite caching, end-to-end wiring
 
 ### Phase 2: Data Collection
 **Goal**: Tool extracts all relevant contributors from a repository including commit authors, PR participants, and issue participants
@@ -90,7 +89,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/3 | Not started | - |
+| 1. Foundation | 0/2 | Not started | - |
 | 2. Data Collection | 0/3 | Not started | - |
 | 3. Organization Intelligence | 0/2 | Not started | - |
 | 4. Output & Reporting | 0/2 | Not started | - |
