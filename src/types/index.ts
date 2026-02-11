@@ -21,3 +21,14 @@ export interface FetchResult {
   html: string;
   fromCache: boolean;
 }
+
+export interface CacheEntry {
+  key: string;
+  value: string;
+  expiresAt: number;  // Unix timestamp ms
+}
+
+export interface CacheConfig {
+  dbPath?: string;     // Override default path
+  ttlMs?: number;      // Override default TTL (7 days)
+}
