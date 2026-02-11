@@ -93,6 +93,9 @@ program
     // Create progress bar for fetch loop (respects quiet mode)
     const progressBar = createProgressBar(repos.length, 'Repositories', options);
 
+    // Track if any errors occurred
+    let hasErrors = false;
+
     // Fetch each repo with progress indication
     for (const repo of repos) {
       try {
@@ -100,6 +103,7 @@ program
         logVerbose(`  ${repo.owner}/${repo.repo}: ${result.fromCache ? '(cached)' : '(fetched)'} ${result.html.length} bytes`, options);
         progressBar.increment({ status: result.fromCache ? 'cached' : 'fetched' });
       } catch (err) {
+        hasErrors = true;
         progressBar.increment({ status: 'error' });
         logError(`Failed to fetch ${repo.url}: ${err}`);
         if (options.failFast) {
@@ -125,7 +129,12 @@ program
       db = null;
     }
 
-    logSuccess('Foundation infrastructure verified. Data extraction will be implemented in Phase 2.');
+    // Only show success if no errors (or continue through errors)
+    if (!hasErrors) {
+      logSuccess('Foundation infrastructure verified. Data extraction will be implemented in Phase 2.');
+    } else if (!options.failFast) {
+      logInfo('Completed with errors. Some repositories could not be fetched.', options);
+    }
   });
 
 export function main(): void {
