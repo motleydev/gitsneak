@@ -1,7 +1,20 @@
 import { Command } from 'commander';
+import type Database from 'better-sqlite3';
 import { parseGitHubUrl, parseDelay } from './options.js';
-import { logError, logSuccess, logInfo, logVerbose } from '../output/logger.js';
+import { logError, logWarning, logSuccess, logInfo, logVerbose } from '../output/logger.js';
+import { createDatabase, closeDatabase, getDefaultDbPath } from '../cache/database.js';
+import { CacheRepository } from '../cache/repository.js';
+import { createClient } from '../scraper/client.js';
+import { createProgressBar } from '../output/progress.js';
 import type { GitSneakOptions, RepoInfo } from '../types/index.js';
+
+// Track database for graceful shutdown
+let db: Database.Database | null = null;
+
+process.on('SIGINT', () => {
+  if (db) closeDatabase(db);
+  process.exit(130);
+});
 
 const program = new Command();
 
@@ -57,8 +70,62 @@ program
       logVerbose(`  - ${repo.owner}/${repo.repo}`, options);
     }
 
-    // Placeholder for actual processing (Phase 2+)
-    logSuccess('URL validation complete. Processing will be implemented in future phases.');
+    // Initialize cache (unless --no-cache)
+    let cache: CacheRepository | null = null;
+
+    if (options.cache) {
+      try {
+        db = createDatabase();
+        cache = new CacheRepository(db);
+        logVerbose(`Cache initialized at ${getDefaultDbPath()}`, options);
+      } catch (err) {
+        logWarning(`Failed to initialize cache: ${err}. Continuing without cache.`);
+      }
+    } else {
+      logVerbose('Cache disabled (--no-cache)', options);
+    }
+
+    // Create HTTP client
+    const client = createClient(options, cache, (attempt, error) => {
+      logWarning(`Retry ${attempt}/5: ${error.message}`);
+    });
+
+    // Create progress bar for fetch loop (respects quiet mode)
+    const progressBar = createProgressBar(repos.length, 'Repositories', options);
+
+    // Fetch each repo with progress indication
+    for (const repo of repos) {
+      try {
+        const result = await client.fetch(repo.url);
+        logVerbose(`  ${repo.owner}/${repo.repo}: ${result.fromCache ? '(cached)' : '(fetched)'} ${result.html.length} bytes`, options);
+        progressBar.increment({ status: result.fromCache ? 'cached' : 'fetched' });
+      } catch (err) {
+        progressBar.increment({ status: 'error' });
+        logError(`Failed to fetch ${repo.url}: ${err}`);
+        if (options.failFast) {
+          progressBar.stop();
+          process.exitCode = 1;
+          break;
+        }
+      }
+    }
+
+    // Stop progress bar when done
+    progressBar.stop();
+
+    // Show cache stats
+    if (cache) {
+      const stats = cache.getStats();
+      logInfo(`Cache: ${stats.hits} cached, ${stats.misses} fetched`, options);
+    }
+
+    // Cleanup
+    if (db) {
+      closeDatabase(db);
+      db = null;
+    }
+
+    logSuccess('Foundation infrastructure verified. Data extraction will be implemented in Phase 2.');
   });
 
 export function main(): void {
