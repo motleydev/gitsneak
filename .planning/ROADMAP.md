@@ -10,7 +10,7 @@ GitSneak transforms GitHub repository URLs into organizational intelligence repo
 - Integer phases (1, 2, 3, 4): Planned milestone work
 - Decimal phases (e.g., 2.1): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Foundation** - CLI skeleton, GitHub client, rate limiting, and caching infrastructure
+- [x] **Phase 1: Foundation** - CLI skeleton, GitHub client, rate limiting, and caching infrastructure
 - [ ] **Phase 2: Data Collection** - Extract contributors, PRs, issues, and reviewers with pagination
 - [ ] **Phase 3: Organization Intelligence** - Detect and normalize organizational affiliations from user profiles
 - [ ] **Phase 4: Output & Reporting** - Generate ASCII tables and HTML reports with weighted analysis
@@ -30,8 +30,8 @@ GitSneak transforms GitHub repository URLs into organizational intelligence repo
 **Plans:** 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Project setup, TypeScript config, CLI skeleton with all flags
-- [ ] 01-02-PLAN.md — HTTP client with retry logic, SQLite caching, end-to-end wiring
+- [x] 01-01-PLAN.md — Project setup, TypeScript config, CLI skeleton with all flags
+- [x] 01-02-PLAN.md — HTTP client with retry logic, SQLite caching, end-to-end wiring
 
 ### Phase 2: Data Collection
 **Goal**: Tool extracts all relevant contributors from a repository including commit authors, PR participants, and issue participants
@@ -89,7 +89,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/2 | Not started | - |
+| 1. Foundation | 2/2 | Complete | 2026-02-11 |
 | 2. Data Collection | 0/3 | Not started | - |
 | 3. Organization Intelligence | 0/2 | Not started | - |
 | 4. Output & Reporting | 0/2 | Not started | - |

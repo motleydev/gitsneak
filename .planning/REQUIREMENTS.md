@@ -75,9 +75,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLI-01 | Phase 1 | Pending |
-| CLI-02 | Phase 1 | Pending |
-| CLI-03 | Phase 1 | Pending |
+| CLI-01 | Phase 1 | Complete |
+| CLI-02 | Phase 1 | Complete |
+| CLI-03 | Phase 1 | Complete |
 | DATA-01 | Phase 2 | Pending |
 | DATA-02 | Phase 2 | Pending |
 | DATA-03 | Phase 2 | Pending |
@@ -85,8 +85,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-05 | Phase 2 | Pending |
 | DATA-06 | Phase 2 | Pending |
 | DATA-07 | Phase 2 | Pending |
-| DATA-08 | Phase 1 | Pending |
-| DATA-09 | Phase 1 | Pending |
+| DATA-08 | Phase 1 | Complete |
+| DATA-09 | Phase 1 | Complete |
 | ORG-01 | Phase 3 | Pending |
 | ORG-02 | Phase 3 | Pending |
 | ORG-03 | Phase 3 | Pending |
