@@ -128,37 +128,43 @@ export class CommitCollector implements Collector {
    * Find commit elements in the page using multiple selector strategies
    */
   private findCommitElements($: cheerio.CheerioAPI): cheerio.Element[] {
-    // Strategy 1: data-testid attribute (modern GitHub)
-    let commits = $('[data-testid="commit-row"]').toArray();
+    // Strategy 1: data-testid="commit-row-item" (current GitHub as of 2025)
+    let commits = $('[data-testid="commit-row-item"]').toArray();
     if (commits.length > 0) {
       return commits;
     }
 
-    // Strategy 2: TimelineItem pattern (GitHub timeline)
+    // Strategy 2: data-testid="commit-row" (older modern GitHub)
+    commits = $('[data-testid="commit-row"]').toArray();
+    if (commits.length > 0) {
+      return commits;
+    }
+
+    // Strategy 3: TimelineItem pattern (GitHub timeline)
     commits = $('.TimelineItem').toArray();
     if (commits.length > 0) {
       return commits;
     }
 
-    // Strategy 3: commits-list-item (older GitHub)
+    // Strategy 4: commits-list-item (older GitHub)
     commits = $('[data-commits-list-item]').toArray();
     if (commits.length > 0) {
       return commits;
     }
 
-    // Strategy 4: BlobCodeContent or commit row divs
+    // Strategy 5: BlobCodeContent or commit row divs
     commits = $('div.commit').toArray();
     if (commits.length > 0) {
       return commits;
     }
 
-    // Strategy 5: Look for commit containers with author links
+    // Strategy 6: Look for commit containers with author links
     commits = $('li:has(a[data-hovercard-type="user"])').toArray();
     if (commits.length > 0) {
       return commits;
     }
 
-    // Strategy 6: Generic - find all elements containing commit author info
+    // Strategy 7: Generic - find all elements containing commit author info
     commits = $('div:has(relative-time):has(a[href^="/"]:not([href*="commit"]))').toArray();
 
     if (this.verbose && commits.length === 0) {
@@ -181,12 +187,11 @@ export class CommitCollector implements Collector {
     // Try various selectors for the author
     let username: string | null = null;
 
-    // Strategy 1: User hovercard link
-    const userLink = $el.find('a[data-hovercard-type="user"]').first();
-    if (userLink.length > 0) {
-      const href = userLink.attr('href');
+    // Strategy 1: Avatar icon link (current GitHub as of 2025)
+    const avatarLink = $el.find('[data-testid="avatar-icon-link"]').first();
+    if (avatarLink.length > 0) {
+      const href = avatarLink.attr('href');
       if (href) {
-        // Extract username from /{username} pattern
         const match = href.match(/^\/([^/]+)$/);
         if (match) {
           username = match[1];
@@ -194,7 +199,22 @@ export class CommitCollector implements Collector {
       }
     }
 
-    // Strategy 2: Commit author span/link
+    // Strategy 2: User hovercard link
+    if (!username) {
+      const userLink = $el.find('a[data-hovercard-type="user"]').first();
+      if (userLink.length > 0) {
+        const href = userLink.attr('href');
+        if (href) {
+          // Extract username from /{username} pattern
+          const match = href.match(/^\/([^/]+)$/);
+          if (match) {
+            username = match[1];
+          }
+        }
+      }
+    }
+
+    // Strategy 3: Commit author span/link
     if (!username) {
       const authorEl = $el.find('.commit-author, .author').first();
       if (authorEl.length > 0) {
@@ -202,7 +222,7 @@ export class CommitCollector implements Collector {
       }
     }
 
-    // Strategy 3: Look for user profile link by href pattern
+    // Strategy 4: Look for user profile link by href pattern
     if (!username) {
       $el.find('a').each((_, linkEl) => {
         const href = $(linkEl).attr('href');
