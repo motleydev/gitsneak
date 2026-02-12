@@ -43,12 +43,12 @@ Plans:
   3. Issue commenters are captured alongside issue authors
   4. Large repositories with 100+ contributors show all results (pagination works)
   5. User can filter to recent activity (e.g., last 12 months)
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md — Types, utilities (bots, emails, dates), and commit collector with cursor pagination
+- [ ] 02-02-PLAN.md — PR collector (authors + reviewers) and issue collector (authors + commenters)
+- [ ] 02-03-PLAN.md — Orchestrator, profile fetching, CLI integration with --since and progress
 
 ### Phase 3: Organization Intelligence
 **Goal**: Tool identifies organizational affiliations for contributors using multiple detection methods
