@@ -76,11 +76,11 @@ Plans:
   3. Rankings reflect weighted activity (heavy contributors rank higher than drive-by participants)
   4. User can analyze multiple repositories and see aggregated cross-repo results
   5. Report shows breakdown by contribution type (commits, PRs, issues)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — Weighted scoring, organization aggregation, and ASCII table output
+- [ ] 04-02-PLAN.md — HTML report generation with Chart.js visualization and --html flag
 
 ## Progress
 
