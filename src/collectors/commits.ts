@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import type { Element } from 'domhandler';
 import type { GitHubClient } from '../scraper/client.js';
 import type { Collector, CollectorResult, ContributorActivity } from './types.js';
 import { createEmptyActivity } from './types.js';
@@ -24,7 +25,9 @@ export class CommitCollector implements Collector {
    * GitHub commits URL doesn't support date filtering directly,
    * so time filtering is done client-side during collection
    */
-  getStartUrl(owner: string, repo: string): string {
+  getStartUrl(owner: string, repo: string, _since?: Date): string {
+    // Note: _since is accepted to match Collector interface but not used
+    // GitHub commits URL doesn't support date params - filtering is client-side
     return `https://github.com/${owner}/${repo}/commits`;
   }
 
@@ -127,7 +130,7 @@ export class CommitCollector implements Collector {
   /**
    * Find commit elements in the page using multiple selector strategies
    */
-  private findCommitElements($: cheerio.CheerioAPI): cheerio.Element[] {
+  private findCommitElements($: cheerio.CheerioAPI): Element[] {
     // Strategy 1: data-testid="commit-row-item" (current GitHub as of 2025)
     let commits = $('[data-testid="commit-row-item"]').toArray();
     if (commits.length > 0) {
@@ -179,7 +182,7 @@ export class CommitCollector implements Collector {
    */
   private parseCommitElement(
     $: cheerio.CheerioAPI,
-    el: cheerio.Element
+    el: Element
   ): { username: string; date: Date | null; email: string | null } | null {
     const $el = $(el);
 

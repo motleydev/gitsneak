@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import type { Element } from 'domhandler';
 import { format } from 'date-fns';
 import type { GitHubClient } from '../scraper/client.js';
 import type { Collector, CollectorResult, ContributorActivity } from './types.js';
@@ -244,7 +245,7 @@ export class IssueCollector implements Collector {
   /**
    * Find issue elements in the page using multiple selector strategies
    */
-  private findIssueElements($: cheerio.CheerioAPI): cheerio.Element[] {
+  private findIssueElements($: cheerio.CheerioAPI): Element[] {
     // Strategy 1: Issue list items with data attribute
     let items = $('[data-id]').filter((_, el) => {
       const $el = $(el);
@@ -288,7 +289,7 @@ export class IssueCollector implements Collector {
    */
   private parseIssueElement(
     $: cheerio.CheerioAPI,
-    el: cheerio.Element
+    el: Element
   ): { username: string; date: Date | null; issueUrl: string | null } | null {
     const $el = $(el);
 

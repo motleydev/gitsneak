@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import type { Element } from 'domhandler';
 import { format } from 'date-fns';
 import type { GitHubClient } from '../scraper/client.js';
 import type { Collector, CollectorResult, ContributorActivity } from './types.js';
@@ -228,7 +229,7 @@ export class PullRequestCollector implements Collector {
   /**
    * Find PR elements in the page using multiple selector strategies
    */
-  private findPRElements($: cheerio.CheerioAPI): cheerio.Element[] {
+  private findPRElements($: cheerio.CheerioAPI): Element[] {
     // Strategy 1: Issue/PR list items with data attribute
     let items = $('[data-id]').filter((_, el) => {
       const $el = $(el);
@@ -271,7 +272,7 @@ export class PullRequestCollector implements Collector {
    */
   private parsePRElement(
     $: cheerio.CheerioAPI,
-    el: cheerio.Element
+    el: Element
   ): { username: string; date: Date | null; prUrl: string | null } | null {
     const $el = $(el);
 
