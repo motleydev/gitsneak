@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 ## Current Position
 
 Phase: 3 of 4 (Organization Intelligence)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-02-12 - Completed 03-01-PLAN.md (Organization Detection Foundation)
+Plan: 2 of 2 in current phase
+Status: Phase Complete
+Last activity: 2026-02-12 - Completed 03-02-PLAN.md (Organization Detection Assembly)
 
-Progress: [#######---] 75%
+Progress: [########--] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 4 min
-- Total execution time: 0.38 hours
+- Total execution time: 0.45 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [#######---] 75%
 |-------|-------|-------|----------|
 | 01-foundation | 2 | 8 min | 4 min |
 | 02-data-collection | 3 | 9 min | 3 min |
-| 03-organization-intelligence | 1 | 4 min | 4 min |
+| 03-organization-intelligence | 2 | 8 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (5 min), 02-01 (2 min), 02-02 (2 min), 02-03 (5 min), 03-01 (4 min)
+- Last 5 plans: 02-01 (2 min), 02-02 (2 min), 02-03 (5 min), 03-01 (4 min), 03-02 (4 min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -61,6 +61,9 @@ Recent decisions affecting current work:
 - tldts for domain parsing - handles subdomains correctly (cloud.google.com -> google)
 - Preserve legal suffixes (Inc, LLC) per CONTEXT.md
 - 18 company alias entries covering Meta/Alphabet/X/Block family rebrandings
+- Company field prioritized as primary org when available
+- All signals collected first, then deduplicated (not short-circuit)
+- CaseInsensitiveOrgMap stores canonical casing for display
 
 ### Pending Todos
 
@@ -73,5 +76,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-12
-Stopped at: Completed 03-01-PLAN.md (Organization Detection Foundation)
+Stopped at: Completed 03-02-PLAN.md (Organization Detection Assembly) - Phase 3 complete
 Resume file: None
