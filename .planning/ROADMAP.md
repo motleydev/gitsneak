@@ -13,7 +13,8 @@ GitSneak transforms GitHub repository URLs into organizational intelligence repo
 - [x] **Phase 1: Foundation** - CLI skeleton, GitHub client, rate limiting, and caching infrastructure
 - [x] **Phase 2: Data Collection** - Extract contributors, PRs, issues, and reviewers with pagination
 - [x] **Phase 3: Organization Intelligence** - Detect and normalize organizational affiliations from user profiles
-- [ ] **Phase 4: Output & Reporting** - Generate ASCII tables and HTML reports with weighted analysis
+- [x] **Phase 4: Output & Reporting** - Generate ASCII tables and HTML reports with weighted analysis
+- [ ] **Phase 5: Packaging & Distribution** - Justfile, man pages, Homebrew formula, and standalone binary
 
 ## Phase Details
 
@@ -79,17 +80,35 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Weighted scoring, organization aggregation, and ASCII table output
-- [ ] 04-02-PLAN.md — HTML report generation with Chart.js visualization and --html flag
+- [x] 04-01-PLAN.md — Weighted scoring, organization aggregation, and ASCII table output
+- [x] 04-02-PLAN.md — HTML report generation with Chart.js visualization and --html flag
+
+### Phase 5: Packaging & Distribution
+**Goal**: Tool is installable via Homebrew with professional CLI experience including man pages and streamlined build process
+**Depends on**: Phase 4
+**Requirements**: DIST-01, DIST-02, DIST-03, DIST-04, DIST-05
+**Success Criteria** (what must be TRUE):
+  1. User can install via `brew install <tap>/gitsneak` without Node.js pre-installed
+  2. User can run `man gitsneak` to see formatted documentation
+  3. User sees well-structured `--help` output with sections, examples, and defaults
+  4. Developer can run `just build`, `just test`, `just release` for common tasks
+  5. GitHub releases trigger automatic Homebrew formula updates
+**Plans:** 3 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Justfile with build, test, lint, clean, and release recipes
+- [ ] 05-02-PLAN.md — Enhanced --help output, man page generation with marked-man
+- [ ] 05-03-PLAN.md — Standalone binary with pkg, Homebrew tap and formula, GitHub Actions automation
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete | 2026-02-11 |
 | 2. Data Collection | 3/3 | Complete | 2026-02-12 |
 | 3. Organization Intelligence | 2/2 | Complete | 2026-02-12 |
-| 4. Output & Reporting | 0/2 | Not started | - |
+| 4. Output & Reporting | 2/2 | Complete | 2026-02-12 |
+| 5. Packaging & Distribution | 0/3 | Not started | - |

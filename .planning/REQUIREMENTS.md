@@ -42,6 +42,14 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **OUT-04**: Aggregate results across multiple repositories
 - [ ] **OUT-05**: Show breakdown by contribution type (commits, PRs, issues)
 
+### Packaging & Distribution
+
+- [ ] **DIST-01**: Installable via Homebrew custom tap (standalone, no Node.js required)
+- [ ] **DIST-02**: Man page accessible via `man gitsneak`
+- [ ] **DIST-03**: Well-structured --help output with sections, examples, and defaults
+- [ ] **DIST-04**: Justfile for build, test, lint, and release workflows
+- [ ] **DIST-05**: Automated formula updates on GitHub release
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -93,15 +101,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ORG-04 | Phase 3 | Complete |
 | ORG-05 | Phase 3 | Complete |
 | ORG-06 | Phase 3 | Complete |
-| OUT-01 | Phase 4 | Pending |
-| OUT-02 | Phase 4 | Pending |
-| OUT-03 | Phase 4 | Pending |
-| OUT-04 | Phase 4 | Pending |
-| OUT-05 | Phase 4 | Pending |
+| OUT-01 | Phase 4 | Complete |
+| OUT-02 | Phase 4 | Complete |
+| OUT-03 | Phase 4 | Complete |
+| OUT-04 | Phase 4 | Complete |
+| OUT-05 | Phase 4 | Complete |
+| DIST-01 | Phase 5 | Pending |
+| DIST-02 | Phase 5 | Pending |
+| DIST-03 | Phase 5 | Pending |
+| DIST-04 | Phase 5 | Pending |
+| DIST-05 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 23 total
-- Mapped to phases: 23
+- v1 requirements: 28 total
+- Mapped to phases: 28
 - Unmapped: 0
 
 ---
