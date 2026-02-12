@@ -60,11 +60,11 @@ Plans:
   3. Commit email domains provide fallback affiliation (excluding generic providers)
   4. Duplicate organizations are normalized (e.g., "Google" and "Google LLC" merge)
   5. Each affiliation shows a confidence indicator (high/medium/low)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md — Organization types, email parser with tldts, blocklist, normalizer, and alias mappings
+- [ ] 03-02-PLAN.md — Confidence scoring, case-insensitive deduplication, OrganizationDetector, and collector integration
 
 ### Phase 4: Output & Reporting
 **Goal**: Tool produces actionable business development reports ranking organizations by their investment in the repository
