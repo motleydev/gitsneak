@@ -7,6 +7,8 @@ import { CacheRepository } from '../cache/repository.js';
 import { createClient } from '../scraper/client.js';
 import { createProgressBar } from '../output/progress.js';
 import { collectContributors } from '../collectors/index.js';
+import type { CollectionResult } from '../collectors/index.js';
+import { generateReport, displayReport } from '../reporting/index.js';
 import type { GitSneakOptions, RepoInfo } from '../types/index.js';
 
 // Track database for graceful shutdown
@@ -115,6 +117,10 @@ program
     // Track if any errors occurred
     let hasErrors = false;
 
+    // Store collection results for reporting
+    const collectionResults: CollectionResult[] = [];
+    const repoNames: string[] = [];
+
     // Process each repository
     for (const repo of repos) {
       // Create abort controller for this repo
@@ -152,6 +158,10 @@ program
           break;
         }
 
+        // Store result for reporting
+        collectionResults.push(result);
+        repoNames.push(`${repo.owner}/${repo.repo}`);
+
         // Show completion summary
         const { stats } = result;
         logSuccess(`Found ${stats.uniqueContributors} contributors:`);
@@ -176,6 +186,12 @@ program
     if (cache) {
       const stats = cache.getStats();
       logInfo(`Cache: ${stats.hits} cached, ${stats.misses} fetched`, options);
+    }
+
+    // Generate and display report if we have results
+    if (collectionResults.length > 0) {
+      const report = generateReport(collectionResults, repoNames);
+      displayReport(report, options);
     }
 
     // Cleanup
