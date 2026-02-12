@@ -5,6 +5,7 @@ import { CommitCollector } from './commits.js';
 import { PullRequestCollector } from './pull-requests.js';
 import { IssueCollector } from './issues.js';
 import { ProfileFetcher } from './profiles.js';
+import { OrganizationDetector } from '../organization/index.js';
 
 /**
  * Result from collecting all contributor data
@@ -18,6 +19,10 @@ export interface CollectionResult {
     issuesAuthored: number;
     issuesCommented: number;
     uniqueContributors: number;
+  };
+  orgStats?: {
+    withAffiliation: number;
+    unknown: number;
   };
   aborted: boolean;
 }
@@ -234,8 +239,47 @@ export async function collectContributors(
 
   log(`[Orchestrator] Profiles complete: ${profiles.size} fetched`);
 
+  if (checkAborted()) {
+    return buildResult(allContributors, totalCommits, totalPrsAuthored, totalPrsReviewed,
+      totalIssuesAuthored, totalIssuesCommented, true);
+  }
+
+  // 6. Detect organization affiliations
+  log('[Orchestrator] Starting organization detection...');
+  const detector = new OrganizationDetector(verbose);
+  let withAffiliation = 0;
+  let unknown = 0;
+  let orgDetected = 0;
+
+  for (const [username, activity] of allContributors) {
+    const profile = profiles.get(username);
+    if (profile) {
+      const result = detector.detectForContributor(profile, activity.emails);
+      activity.affiliations = result.affiliations;
+      activity.primaryOrg = result.primaryOrg;
+
+      if (result.affiliations.length > 0) {
+        withAffiliation++;
+      } else {
+        unknown++;
+      }
+
+      orgDetected++;
+      if (onProgress) {
+        onProgress('organizations', orgDetected, allContributors.size);
+      }
+    } else {
+      // No profile fetched, mark as unknown
+      activity.affiliations = [];
+      activity.primaryOrg = null;
+      unknown++;
+    }
+  }
+
+  log(`[Orchestrator] Organization detection complete: ${withAffiliation} with affiliations, ${unknown} unknown`);
+
   return buildResult(allContributors, totalCommits, totalPrsAuthored, totalPrsReviewed,
-    totalIssuesAuthored, totalIssuesCommented, aborted);
+    totalIssuesAuthored, totalIssuesCommented, aborted, { withAffiliation, unknown });
 }
 
 /**
@@ -248,7 +292,8 @@ function buildResult(
   prsReviewed: number,
   issuesAuthored: number,
   issuesCommented: number,
-  aborted: boolean
+  aborted: boolean,
+  orgStats?: { withAffiliation: number; unknown: number }
 ): CollectionResult {
   return {
     contributors,
@@ -260,6 +305,7 @@ function buildResult(
       issuesCommented,
       uniqueContributors: contributors.size,
     },
+    orgStats,
     aborted,
   };
 }

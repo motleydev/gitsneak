@@ -1,3 +1,5 @@
+import type { OrganizationAffiliation } from '../organization/types.js';
+
 /**
  * Contributor activity data collected from GitHub
  */
@@ -11,6 +13,8 @@ export interface ContributorActivity {
   emails: Set<string>;
   lastActivityDate: Date;
   profileFetched: boolean;
+  affiliations?: OrganizationAffiliation[];
+  primaryOrg?: string | null;
 }
 
 /**
