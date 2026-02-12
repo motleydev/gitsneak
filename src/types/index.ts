@@ -5,6 +5,7 @@ export interface GitSneakOptions {
   cache: boolean;     // true by default, --no-cache sets false
   failFast: boolean;  // false by default, --fail-fast sets true
   since?: Date;       // filter to activity after this date
+  html?: boolean | string;  // --html flag: true for temp file, string for custom path
 }
 
 export interface RepoInfo {

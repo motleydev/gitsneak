@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import type Database from 'better-sqlite3';
+import { writeFile } from 'node:fs/promises';
 import { parseGitHubUrl, parseDelay, parseSince } from './options.js';
 import { logError, logWarning, logSuccess, logInfo, logVerbose } from '../output/logger.js';
 import { createDatabase, closeDatabase, getDefaultDbPath } from '../cache/database.js';
@@ -9,6 +10,7 @@ import { createProgressBar } from '../output/progress.js';
 import { collectContributors } from '../collectors/index.js';
 import type { CollectionResult } from '../collectors/index.js';
 import { generateReport, displayReport } from '../reporting/index.js';
+import { generateHtmlReport, openReport } from '../output/html-report.js';
 import type { GitSneakOptions, RepoInfo } from '../types/index.js';
 
 // Track database for graceful shutdown
@@ -40,6 +42,7 @@ program
   .option('--since <date>', 'filter to activity after date (ISO or relative like 12m, 1y)', '12m')
   .option('--no-cache', 'bypass cache and fetch fresh data')
   .option('--fail-fast', 'stop on first error instead of continuing', false)
+  .option('--html [path]', 'generate HTML report (optionally specify output path)')
   .action(async (urls: string[], opts) => {
     // Parse --since option
     let since: Date;
@@ -58,6 +61,7 @@ program
       cache: opts.cache,
       failFast: opts.failFast,
       since,
+      html: opts.html,
     };
 
     // Validate mutual exclusivity
@@ -192,6 +196,21 @@ program
     if (collectionResults.length > 0) {
       const report = generateReport(collectionResults, repoNames);
       displayReport(report, options);
+
+      // Generate HTML report if requested
+      if (options.html) {
+        const html = generateHtmlReport(report);
+
+        if (typeof options.html === 'string') {
+          // Write to specified path
+          await writeFile(options.html, html, 'utf-8');
+          logSuccess(`HTML report written to ${options.html}`);
+        } else {
+          // Write to temp and open in browser
+          const reportPath = await openReport(html);
+          logSuccess(`HTML report opened: ${reportPath}`);
+        }
+      }
     }
 
     // Cleanup
