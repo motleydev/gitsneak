@@ -67,7 +67,16 @@ export class IssueCollector implements Collector {
     const contributors = new Map<string, ContributorActivity>();
     let itemsProcessed = 0;
 
-    const { html } = await this.client.fetch(url);
+    if (this.verbose) {
+      console.log(`[IssueCollector] Fetching: ${url}`);
+    }
+
+    const { html, fromCache } = await this.client.fetch(url);
+
+    if (this.verbose) {
+      console.log(`[IssueCollector] ${fromCache ? 'Cache hit' : 'Fetched'}: ${html.length} bytes`);
+    }
+
     const $ = cheerio.load(html);
 
     // Find issue list items
@@ -136,6 +145,14 @@ export class IssueCollector implements Collector {
     // Get next page URL
     const nextPage = extractNextPage($, 'issues');
 
+    if (nextPage && this.verbose) {
+      console.log(`[IssueCollector] Found next page`);
+    }
+
+    if (this.verbose) {
+      console.log(`[IssueCollector] Page complete: ${itemsProcessed} issues, ${contributors.size} unique contributors`);
+    }
+
     return {
       contributors,
       nextPage,
@@ -152,7 +169,16 @@ export class IssueCollector implements Collector {
     since?: Date
   ): Promise<void> {
     try {
-      const { html } = await this.client.fetch(issueUrl);
+      if (this.verbose) {
+        console.log(`[IssueCollector] Fetching issue detail: ${issueUrl}`);
+      }
+
+      const { html, fromCache } = await this.client.fetch(issueUrl);
+
+      if (this.verbose) {
+        console.log(`[IssueCollector] ${fromCache ? 'Cache hit' : 'Fetched'}: ${html.length} bytes`);
+      }
+
       const $ = cheerio.load(html);
 
       // Extract commenters from the issue thread

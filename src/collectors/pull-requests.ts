@@ -82,7 +82,16 @@ export class PullRequestCollector implements Collector {
     const contributors = new Map<string, ContributorActivity>();
     let itemsProcessed = 0;
 
-    const { html } = await this.client.fetch(url);
+    if (this.verbose) {
+      console.log(`[PullRequestCollector] Fetching: ${url}`);
+    }
+
+    const { html, fromCache } = await this.client.fetch(url);
+
+    if (this.verbose) {
+      console.log(`[PullRequestCollector] ${fromCache ? 'Cache hit' : 'Fetched'}: ${html.length} bytes`);
+    }
+
     const $ = cheerio.load(html);
 
     // Find PR list items
@@ -151,6 +160,14 @@ export class PullRequestCollector implements Collector {
     // Get next page URL
     const nextPage = extractNextPage($, 'prs');
 
+    if (nextPage && this.verbose) {
+      console.log(`[PullRequestCollector] Found next page`);
+    }
+
+    if (this.verbose) {
+      console.log(`[PullRequestCollector] Page complete: ${itemsProcessed} PRs, ${contributors.size} unique contributors`);
+    }
+
     return {
       contributors,
       nextPage,
@@ -167,7 +184,16 @@ export class PullRequestCollector implements Collector {
     since?: Date
   ): Promise<void> {
     try {
-      const { html } = await this.client.fetch(prUrl);
+      if (this.verbose) {
+        console.log(`[PullRequestCollector] Fetching PR detail: ${prUrl}`);
+      }
+
+      const { html, fromCache } = await this.client.fetch(prUrl);
+
+      if (this.verbose) {
+        console.log(`[PullRequestCollector] ${fromCache ? 'Cache hit' : 'Fetched'}: ${html.length} bytes`);
+      }
+
       const $ = cheerio.load(html);
 
       // Extract reviewers from the sidebar or review timeline

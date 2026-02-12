@@ -39,7 +39,16 @@ export class CommitCollector implements Collector {
     let itemsProcessed = 0;
     let hitCutoff = false;
 
-    const { html } = await this.client.fetch(url);
+    if (this.verbose) {
+      console.log(`[CommitCollector] Fetching: ${url}`);
+    }
+
+    const { html, fromCache } = await this.client.fetch(url);
+
+    if (this.verbose) {
+      console.log(`[CommitCollector] ${fromCache ? 'Cache hit' : 'Fetched'}: ${html.length} bytes`);
+    }
+
     const $ = cheerio.load(html);
 
     // GitHub commit list uses various selectors depending on page version
@@ -99,6 +108,13 @@ export class CommitCollector implements Collector {
     let nextPage: string | null = null;
     if (!hitCutoff) {
       nextPage = extractNextPage($, 'commits');
+      if (nextPage && this.verbose) {
+        console.log(`[CommitCollector] Found next page`);
+      }
+    }
+
+    if (this.verbose) {
+      console.log(`[CommitCollector] Page complete: ${itemsProcessed} commits, ${contributors.size} unique contributors`);
     }
 
     return {
