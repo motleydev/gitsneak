@@ -4,6 +4,7 @@ export interface GitSneakOptions {
   delay: number;      // milliseconds between requests
   cache: boolean;     // true by default, --no-cache sets false
   failFast: boolean;  // false by default, --fail-fast sets true
+  since?: Date;       // filter to activity after this date
 }
 
 export interface RepoInfo {
