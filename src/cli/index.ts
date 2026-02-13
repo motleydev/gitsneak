@@ -43,6 +43,28 @@ program
   .option('--no-cache', 'bypass cache and fetch fresh data')
   .option('--fail-fast', 'stop on first error instead of continuing', false)
   .option('--html [path]', 'generate HTML report (optionally specify output path)')
+  .addHelpText('after', `
+Examples:
+  $ gitsneak https://github.com/facebook/react
+      Analyze contributors to React
+
+  $ gitsneak -v --since 6m https://github.com/org/repo
+      Verbose analysis of last 6 months
+
+  $ gitsneak --html report.html https://github.com/org/repo1 https://github.com/org/repo2
+      Generate HTML report for multiple repos
+
+Date formats for --since:
+  ISO date:    2025-01-01
+  Relative:    12m (months), 1y (year), 2w (weeks), 30d (days)
+
+Environment:
+  NO_COLOR     Disable colored output
+
+Documentation:
+  man gitsneak
+  https://github.com/jesseops/gitsneak
+`)
   .action(async (urls: string[], opts) => {
     // Parse --since option
     let since: Date;
