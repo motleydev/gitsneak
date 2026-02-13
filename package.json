@@ -9,9 +9,14 @@
   },
   "scripts": {
     "build": "tsup",
+    "build:man": "mkdir -p man && npx marked-man docs/gitsneak.1.md --section 1 --name gitsneak --version $(node -p \"require('./package.json').version\") > man/gitsneak.1",
     "dev": "tsup --watch",
     "lint": "tsc --noEmit"
   },
+  "files": [
+    "dist",
+    "man"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -32,6 +37,7 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/cli-progress": "^3.11.6",
     "@types/node": "^25.2.3",
+    "marked-man": "^2.1.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }

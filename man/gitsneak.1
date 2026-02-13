@@ -1,0 +1,110 @@
+.TH "GITSNEAK" "1" "February 2026" "1.0.0"
+.SH "NAME"
+\fBgitsneak\fR \- analyze organizational involvement in GitHub repositories
+.SH SYNOPSIS
+.P
+\fBgitsneak\fP [options] <urls\.\.\.>
+.SH DESCRIPTION
+.P
+gitsneak analyzes GitHub repositories to identify organizational involvement
+.br
+by examining commits, pull requests, issues, and contributor profiles\. It
+.br
+produces ranked reports showing which companies have the most investment in
+.br
+a project\.
+.SH OPTIONS
+
+.RS 1
+.IP \(bu 2
+\fB\-v\fP, \fB\-\-verbose\fP:
+.br
+Show detailed output including URLs fetched and timing information\.
+.IP \(bu 2
+\fB\-q\fP, \fB\-\-quiet\fP:
+.br
+Suppress progress indicators, show only final output\.
+.IP \(bu 2
+\fB\-\-delay\fP <ms>:
+.br
+Delay between requests in milliseconds\. Default: 1500
+.IP \(bu 2
+\fB\-\-since\fP <date>:
+.br
+Filter to activity after date\. Accepts ISO dates (2025\-01\-01) or
+.br
+relative formats (12m, 6mo, 1y, 2w, 30d)\. Default: 12m
+.IP \(bu 2
+\fB\-\-no\-cache\fP:
+.br
+Bypass local cache and fetch fresh data from GitHub\.
+.IP \(bu 2
+\fB\-\-fail\-fast\fP:
+.br
+Stop on first error instead of continuing with remaining repositories\.
+.IP \(bu 2
+\fB\-\-html\fP [path]:
+.br
+Generate HTML report\. If path provided, writes to file; otherwise
+.br
+opens in default browser\.
+
+.RE
+.SH EXAMPLES
+.P
+Analyze a single repository:
+.RS 2
+.nf
+gitsneak https://github\.com/facebook/react
+.fi
+.RE
+.P
+Analyze multiple repositories with verbose output:
+.RS 2
+.nf
+gitsneak \-v https://github\.com/org/repo1 https://github\.com/org/repo2
+.fi
+.RE
+.P
+Generate HTML report for last 6 months:
+.RS 2
+.nf
+gitsneak \-\-html report\.html \-\-since 6m https://github\.com/org/repo
+.fi
+.RE
+.SH EXIT STATUS
+
+.RS 1
+.IP \(bu 2
+\fB0\fP: Success
+.IP \(bu 2
+\fB1\fP: Error (invalid URL, network failure, etc\.)
+.IP \(bu 2
+\fB130\fP: Interrupted (Ctrl+C)
+
+.RE
+.SH FILES
+
+.RS 1
+.IP \(bu 2
+\fB~/\.local/share/gitsneak/cache\.db\fP:
+.br
+SQLite cache for user profiles (XDG\-compliant path on Linux)\.
+
+.RE
+.SH ENVIRONMENT
+
+.RS 1
+.IP \(bu 2
+\fBNO_COLOR\fP:
+.br
+Disable colored output\.
+
+.RE
+.SH SEE ALSO
+.P
+GitHub repository: https://github.com/jesseops/gitsneak
+.SH AUTHOR
+.P
+Jesse Robertson
+
