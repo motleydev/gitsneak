@@ -14,7 +14,7 @@ export interface TableOptions {
  *
  * @param orgs - Ranked organization reports
  * @param unknown - Unknown/unaffiliated contributors
- * @param options - Rendering options (limit defaults to 15)
+ * @param options - Rendering options
  * @returns ASCII table string
  */
 export function renderOrganizationTable(
@@ -22,7 +22,7 @@ export function renderOrganizationTable(
   unknown: ContributorScore[],
   options: TableOptions = {}
 ): string {
-  const limit = options.limit ?? 15;
+  const limit = options.limit ?? orgs.length; // Show all by default
 
   const table = new Table({
     head: [

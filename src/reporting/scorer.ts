@@ -43,6 +43,7 @@ export function scoreContributor(activity: ContributorActivity): ContributorScor
   return {
     username: activity.username,
     score: calculateScore(activity),
+    organization: activity.primaryOrg ?? null,
     breakdown: {
       commits: activity.commits,
       prsAuthored: activity.prsAuthored,

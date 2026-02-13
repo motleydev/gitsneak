@@ -339,6 +339,89 @@ export class PullRequestCollector implements Collector {
   }
 
   /**
+   * Collect a single PR's author and reviewers from its detail page
+   * Used for PR-scoped analysis
+   */
+  async collectSinglePR(
+    owner: string,
+    repo: string,
+    prNumber: number,
+    options: { signal?: AbortSignal } = {}
+  ): Promise<{ contributors: Map<string, ContributorActivity>; author: string | null }> {
+    const contributors = new Map<string, ContributorActivity>();
+    const prUrl = `https://github.com/${owner}/${repo}/pull/${prNumber}`;
+
+    if (this.verbose) {
+      console.log(`[PullRequestCollector] Fetching single PR: ${prUrl}`);
+    }
+
+    const { html, fromCache } = await this.client.fetch(prUrl);
+
+    if (this.verbose) {
+      console.log(`[PullRequestCollector] ${fromCache ? 'Cache hit' : 'Fetched'}: ${html.length} bytes`);
+    }
+
+    const $ = cheerio.load(html);
+
+    // Extract PR author from the detail page
+    let author: string | null = null;
+
+    // Strategy 1: Author link in header
+    const authorLink = $('a[data-hovercard-type="user"].author').first();
+    if (authorLink.length > 0) {
+      author = authorLink.text().trim();
+    }
+
+    // Strategy 2: Look for "opened this pull request" pattern
+    if (!author) {
+      const openedBy = $('.gh-header-meta a[data-hovercard-type="user"]').first();
+      if (openedBy.length > 0) {
+        const href = openedBy.attr('href');
+        if (href) {
+          const match = href.match(/^\/([^/]+)$/);
+          if (match) {
+            author = match[1];
+          }
+        }
+      }
+    }
+
+    // Add author to contributors
+    if (author && !isBot(author)) {
+      const activity = createEmptyActivity(author);
+      activity.prsAuthored = 1;
+      activity.lastActivityDate = new Date();
+      contributors.set(author, activity);
+    }
+
+    // Extract reviewers
+    const reviewers = this.extractReviewers($);
+    for (const reviewer of reviewers) {
+      if (isBot(reviewer)) {
+        continue;
+      }
+
+      // Don't double-count if reviewer is also the author
+      if (reviewer === author) {
+        continue;
+      }
+
+      let activity = contributors.get(reviewer);
+      if (!activity) {
+        activity = createEmptyActivity(reviewer);
+        contributors.set(reviewer, activity);
+      }
+      activity.prsReviewed++;
+    }
+
+    if (this.verbose) {
+      console.log(`[PullRequestCollector] Single PR: author=${author}, ${reviewers.length} reviewers`);
+    }
+
+    return { contributors, author };
+  }
+
+  /**
    * Extract reviewers from a PR detail page
    */
   private extractReviewers($: cheerio.CheerioAPI): string[] {

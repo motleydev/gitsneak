@@ -1,5 +1,5 @@
 import { subMonths, subYears, subDays, subWeeks } from 'date-fns';
-import type { RepoInfo } from '../types/index.js';
+import type { AnalysisTarget, RepoTarget, PRTarget } from '../types/index.js';
 
 /**
  * Parse a --since value into a Date
@@ -58,12 +58,27 @@ export function parseDelay(value: string): number {
   return parsed;
 }
 
-export function parseGitHubUrl(url: string): RepoInfo {
-  // Must be full URL: https://github.com/owner/repo
-  const pattern = /^https?:\/\/github\.com\/([^\/]+)\/([^\/\s#?]+)\/?$/;
-  const match = url.match(pattern);
+export function parseGitHubUrl(url: string): AnalysisTarget {
+  // PR URL pattern: github.com/owner/repo/pull/123
+  const prPattern = /^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/pull\/(\d+)\/?$/;
+  const prMatch = url.match(prPattern);
+  if (prMatch) {
+    const [, owner, repo, prNumber] = prMatch;
+    const cleanRepo = repo.replace(/\.git$/, '');
+    return {
+      type: 'pr',
+      owner,
+      repo: cleanRepo,
+      prNumber: parseInt(prNumber, 10),
+      url,
+    } satisfies PRTarget;
+  }
 
-  if (!match) {
+  // Repo URL pattern: github.com/owner/repo
+  const repoPattern = /^https?:\/\/github\.com\/([^\/]+)\/([^\/\s#?]+)\/?$/;
+  const repoMatch = url.match(repoPattern);
+
+  if (!repoMatch) {
     // Check if user provided shorthand like owner/repo
     if (/^[^\/]+\/[^\/]+$/.test(url) && !url.includes(':')) {
       throw new Error(
@@ -71,17 +86,18 @@ export function parseGitHubUrl(url: string): RepoInfo {
       );
     }
     throw new Error(
-      'Invalid GitHub URL format. Expected: https://github.com/owner/repo'
+      'Invalid GitHub URL format. Expected: https://github.com/owner/repo or https://github.com/owner/repo/pull/123'
     );
   }
 
-  const [, owner, repo] = match;
+  const [, owner, repo] = repoMatch;
   // Remove any .git suffix
   const cleanRepo = repo.replace(/\.git$/, '');
 
   return {
+    type: 'repo',
     owner,
     repo: cleanRepo,
     url: `https://github.com/${owner}/${cleanRepo}`,
-  };
+  } satisfies RepoTarget;
 }

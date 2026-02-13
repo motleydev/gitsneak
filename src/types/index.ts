@@ -8,11 +8,25 @@ export interface GitSneakOptions {
   html?: boolean | string;  // --html flag: true for temp file, string for custom path
 }
 
-export interface RepoInfo {
+export interface RepoTarget {
+  type: 'repo';
   owner: string;
   repo: string;
   url: string;
 }
+
+export interface PRTarget {
+  type: 'pr';
+  owner: string;
+  repo: string;
+  prNumber: number;
+  url: string;
+}
+
+export type AnalysisTarget = RepoTarget | PRTarget;
+
+// Backwards compatibility alias
+export type RepoInfo = RepoTarget;
 
 export interface CacheStats {
   hits: number;

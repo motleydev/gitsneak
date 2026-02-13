@@ -16,11 +16,30 @@
   },
   "files": [
     "dist",
-    "man"
+    "man",
+    "README.md"
   ],
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "github",
+    "contributors",
+    "organization",
+    "analysis",
+    "cli",
+    "osint"
+  ],
+  "author": "Jesse Schoepfer",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/motleydev/gitsneak.git"
+  },
+  "homepage": "https://github.com/motleydev/gitsneak",
+  "bugs": {
+    "url": "https://github.com/motleydev/gitsneak/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
     "cheerio": "^1.2.0",

@@ -6,13 +6,17 @@
 \fBgitsneak\fP [options] <urls\.\.\.>
 .SH DESCRIPTION
 .P
-gitsneak analyzes GitHub repositories to identify organizational involvement
+gitsneak analyzes GitHub repositories and pull requests to identify
 .br
-by examining commits, pull requests, issues, and contributor profiles\. It
+organizational involvement by examining commits, pull requests, issues,
 .br
-produces ranked reports showing which companies have the most investment in
+and contributor profiles\. It produces ranked reports showing which
 .br
-a project\.
+companies have the most investment in a project\.
+.P
+Supports both repository URLs (https://github.com/owner/repo) and
+.br
+individual PR URLs (https://github.com/owner/repo/pull/123)\.
 .SH OPTIONS
 
 .RS 1
@@ -59,10 +63,24 @@ gitsneak https://github\.com/facebook/react
 .fi
 .RE
 .P
+Analyze a single pull request:
+.RS 2
+.nf
+gitsneak https://github\.com/facebook/react/pull/28000
+.fi
+.RE
+.P
 Analyze multiple repositories with verbose output:
 .RS 2
 .nf
 gitsneak \-v https://github\.com/org/repo1 https://github\.com/org/repo2
+.fi
+.RE
+.P
+Mix repository and PR analysis:
+.RS 2
+.nf
+gitsneak https://github\.com/org/repo https://github\.com/org/repo/pull/123
 .fi
 .RE
 .P
@@ -103,7 +121,7 @@ Disable colored output\.
 .RE
 .SH SEE ALSO
 .P
-GitHub repository: https://github.com/jesseops/gitsneak
+GitHub repository: https://github.com/motleydev/gitsneak
 .SH AUTHOR
 .P
 Jesse Robertson

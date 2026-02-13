@@ -7,11 +7,11 @@ import { createDatabase, closeDatabase, getDefaultDbPath } from '../cache/databa
 import { CacheRepository } from '../cache/repository.js';
 import { createClient } from '../scraper/client.js';
 import { createProgressBar } from '../output/progress.js';
-import { collectContributors } from '../collectors/index.js';
+import { collectContributors, collectPRContributors } from '../collectors/index.js';
 import type { CollectionResult } from '../collectors/index.js';
 import { generateReport, displayReport } from '../reporting/index.js';
 import { generateHtmlReport, openReport } from '../output/html-report.js';
-import type { GitSneakOptions, RepoInfo } from '../types/index.js';
+import type { GitSneakOptions, AnalysisTarget } from '../types/index.js';
 
 // Track database for graceful shutdown
 let db: Database.Database | null = null;
@@ -48,11 +48,14 @@ Examples:
   $ gitsneak https://github.com/facebook/react
       Analyze contributors to React
 
+  $ gitsneak https://github.com/facebook/react/pull/28000
+      Analyze participants in a single PR
+
   $ gitsneak -v --since 6m https://github.com/org/repo
       Verbose analysis of last 6 months
 
-  $ gitsneak --html report.html https://github.com/org/repo1 https://github.com/org/repo2
-      Generate HTML report for multiple repos
+  $ gitsneak --html report.html https://github.com/org/repo https://github.com/org/repo/pull/123
+      Generate HTML report for repo and PR combined
 
 Date formats for --since:
   ISO date:    2025-01-01
@@ -94,12 +97,12 @@ Documentation:
     }
 
     // Parse and validate all URLs first
-    const repos: RepoInfo[] = [];
+    const targets: AnalysisTarget[] = [];
     for (const url of urls) {
       try {
-        repos.push(parseGitHubUrl(url));
+        targets.push(parseGitHubUrl(url));
       } catch (err) {
-        logError(`Invalid GitHub URL: ${url}`, 'Use full URLs like https://github.com/owner/repo');
+        logError(`Invalid GitHub URL: ${url}`, 'Use full URLs like https://github.com/owner/repo or https://github.com/owner/repo/pull/123');
         if (options.failFast) {
           process.exitCode = 1;
           return;
@@ -107,17 +110,27 @@ Documentation:
       }
     }
 
-    if (repos.length === 0) {
-      logError('No valid repository URLs provided');
+    if (targets.length === 0) {
+      logError('No valid GitHub URLs provided');
       process.exitCode = 1;
       return;
     }
 
     // Log what we're about to do
     const sinceStr = since.toISOString().split('T')[0];
-    logInfo(`Analyzing ${repos.length} repositor${repos.length === 1 ? 'y' : 'ies'} (since ${sinceStr})...`, options);
-    for (const repo of repos) {
-      logVerbose(`  - ${repo.owner}/${repo.repo}`, options);
+    const repoCount = targets.filter(t => t.type === 'repo').length;
+    const prCount = targets.filter(t => t.type === 'pr').length;
+    const targetDesc = [
+      repoCount > 0 ? `${repoCount} repositor${repoCount === 1 ? 'y' : 'ies'}` : '',
+      prCount > 0 ? `${prCount} PR${prCount === 1 ? '' : 's'}` : '',
+    ].filter(Boolean).join(' and ');
+    logInfo(`Analyzing ${targetDesc} (since ${sinceStr})...`, options);
+    for (const target of targets) {
+      if (target.type === 'pr') {
+        logVerbose(`  - ${target.owner}/${target.repo}#${target.prNumber}`, options);
+      } else {
+        logVerbose(`  - ${target.owner}/${target.repo}`, options);
+      }
     }
 
     // Initialize cache (unless --no-cache)
@@ -145,60 +158,92 @@ Documentation:
 
     // Store collection results for reporting
     const collectionResults: CollectionResult[] = [];
-    const repoNames: string[] = [];
+    const targetNames: string[] = [];
 
-    // Process each repository
-    for (const repo of repos) {
-      // Create abort controller for this repo
+    // Process each target (repo or PR)
+    for (const target of targets) {
+      // Create abort controller for this target
       currentAbortController = new AbortController();
 
-      // Create progress bar for this repo
-      const progressBar = createProgressBar(100, `${repo.owner}/${repo.repo}`, options);
+      // Create label for progress bar
+      const targetLabel = target.type === 'pr'
+        ? `${target.owner}/${target.repo}#${target.prNumber}`
+        : `${target.owner}/${target.repo}`;
+
+      // Create progress bar for this target
+      const progressBar = createProgressBar(100, targetLabel, options);
       let lastStage = '';
 
       try {
-        logVerbose(`\nCollecting contributors from ${repo.owner}/${repo.repo}...`, options);
+        if (target.type === 'pr') {
+          logVerbose(`\nCollecting contributors from PR ${targetLabel}...`, options);
 
-        const result = await collectContributors(client, repo.owner, repo.repo, {
-          since: options.since,
-          signal: currentAbortController.signal,
-          verbose: options.verbose,
-          onProgress: (stage, current, total) => {
-            // Update progress bar with stage info
-            if (stage !== lastStage) {
-              lastStage = stage;
-            }
+          const result = await collectPRContributors(client, target.owner, target.repo, target.prNumber, {
+            signal: currentAbortController.signal,
+            verbose: options.verbose,
+            onProgress: (stage, current, total) => {
+              if (stage !== lastStage) {
+                lastStage = stage;
+              }
+              const progress = total ? Math.round((current / total) * 100) : 0;
+              const countStr = total ? `${current}/${total}` : `${current}`;
+              progressBar.update(progress, { status: `${stage}: ${countStr}` });
+            },
+          });
 
-            // Format progress display
-            const progress = total ? Math.round((current / total) * 100) : 0;
-            const countStr = total ? `${current}/${total}` : `${current}`;
-            progressBar.update(progress, { status: `${stage}: ${countStr}` });
-          },
-        });
+          progressBar.stop();
 
-        // Stop progress bar
-        progressBar.stop();
+          if (result.aborted) {
+            logWarning('Collection interrupted. Partial data saved to cache.');
+            break;
+          }
 
-        if (result.aborted) {
-          logWarning('Collection interrupted. Partial data saved to cache.');
-          break;
+          collectionResults.push(result);
+          targetNames.push(targetLabel);
+
+          const { stats } = result;
+          logSuccess(`Found ${stats.uniqueContributors} contributors in PR:`);
+          logInfo(`  - ${stats.commits.toLocaleString()} commits`, options);
+          logInfo(`  - ${stats.prsAuthored} PR author, ${stats.prsReviewed} reviewers`, options);
+          logInfo(`  - ${stats.issuesCommented} comments`, options);
+        } else {
+          logVerbose(`\nCollecting contributors from ${targetLabel}...`, options);
+
+          const result = await collectContributors(client, target.owner, target.repo, {
+            since: options.since,
+            signal: currentAbortController.signal,
+            verbose: options.verbose,
+            onProgress: (stage, current, total) => {
+              if (stage !== lastStage) {
+                lastStage = stage;
+              }
+              const progress = total ? Math.round((current / total) * 100) : 0;
+              const countStr = total ? `${current}/${total}` : `${current}`;
+              progressBar.update(progress, { status: `${stage}: ${countStr}` });
+            },
+          });
+
+          progressBar.stop();
+
+          if (result.aborted) {
+            logWarning('Collection interrupted. Partial data saved to cache.');
+            break;
+          }
+
+          collectionResults.push(result);
+          targetNames.push(targetLabel);
+
+          const { stats } = result;
+          logSuccess(`Found ${stats.uniqueContributors} contributors:`);
+          logInfo(`  - ${stats.commits.toLocaleString()} commits`, options);
+          logInfo(`  - ${stats.prsAuthored + stats.prsReviewed} PRs (${stats.prsAuthored} authored, ${stats.prsReviewed} reviewed)`, options);
+          logInfo(`  - ${stats.issuesAuthored + stats.issuesCommented} issues (${stats.issuesAuthored} authored, ${stats.issuesCommented} commented)`, options);
         }
-
-        // Store result for reporting
-        collectionResults.push(result);
-        repoNames.push(`${repo.owner}/${repo.repo}`);
-
-        // Show completion summary
-        const { stats } = result;
-        logSuccess(`Found ${stats.uniqueContributors} contributors:`);
-        logInfo(`  - ${stats.commits.toLocaleString()} commits`, options);
-        logInfo(`  - ${stats.prsAuthored + stats.prsReviewed} PRs (${stats.prsAuthored} authored, ${stats.prsReviewed} reviewed)`, options);
-        logInfo(`  - ${stats.issuesAuthored + stats.issuesCommented} issues (${stats.issuesAuthored} authored, ${stats.issuesCommented} commented)`, options);
 
       } catch (err) {
         hasErrors = true;
         progressBar.stop();
-        logError(`Failed to collect from ${repo.url}: ${err}`);
+        logError(`Failed to collect from ${target.url}: ${err}`);
         if (options.failFast) {
           process.exitCode = 1;
           break;
@@ -216,7 +261,7 @@ Documentation:
 
     // Generate and display report if we have results
     if (collectionResults.length > 0) {
-      const report = generateReport(collectionResults, repoNames);
+      const report = generateReport(collectionResults, targetNames);
       displayReport(report, options);
 
       // Generate HTML report if requested

@@ -4,6 +4,7 @@
 export interface ContributorScore {
   username: string;
   score: number;
+  organization: string | null;
   breakdown: {
     commits: number;
     prsAuthored: number;
@@ -31,11 +32,27 @@ export interface OrganizationReport {
 }
 
 /**
+ * Summary statistics for the analysis
+ */
+export interface AnalysisSummary {
+  totalContributors: number;
+  totalCommits: number;
+  totalPRsAuthored: number;
+  totalPRsReviewed: number;
+  totalIssuesAuthored: number;
+  totalIssuesCommented: number;
+  affiliatedContributors: number;
+  unaffiliatedContributors: number;
+}
+
+/**
  * Complete report data for display
  */
 export interface ReportData {
   organizations: OrganizationReport[];
   unknownContributors: ContributorScore[];
+  allContributors: ContributorScore[];
+  summary: AnalysisSummary;
   repos: string[];
   generatedAt: Date;
 }

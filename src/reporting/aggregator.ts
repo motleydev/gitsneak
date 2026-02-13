@@ -40,6 +40,7 @@ export function aggregateByOrganization(
   // Process each contributor
   for (const activity of contributors.values()) {
     const scored = scoreContributor(activity);
+    scored.organization = activity.primaryOrg ?? null;
     const primaryOrg = activity.primaryOrg;
 
     // Unaffiliated contributors go to unknown array

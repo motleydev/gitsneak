@@ -6,10 +6,13 @@
 
 ## DESCRIPTION
 
-gitsneak analyzes GitHub repositories to identify organizational involvement
-by examining commits, pull requests, issues, and contributor profiles. It
-produces ranked reports showing which companies have the most investment in
-a project.
+gitsneak analyzes GitHub repositories and pull requests to identify
+organizational involvement by examining commits, pull requests, issues,
+and contributor profiles. It produces ranked reports showing which
+companies have the most investment in a project.
+
+Supports both repository URLs (https://github.com/owner/repo) and
+individual PR URLs (https://github.com/owner/repo/pull/123).
 
 ## OPTIONS
 
@@ -42,9 +45,17 @@ Analyze a single repository:
 
     gitsneak https://github.com/facebook/react
 
+Analyze a single pull request:
+
+    gitsneak https://github.com/facebook/react/pull/28000
+
 Analyze multiple repositories with verbose output:
 
     gitsneak -v https://github.com/org/repo1 https://github.com/org/repo2
+
+Mix repository and PR analysis:
+
+    gitsneak https://github.com/org/repo https://github.com/org/repo/pull/123
 
 Generate HTML report for last 6 months:
 
@@ -68,7 +79,7 @@ Generate HTML report for last 6 months:
 
 ## SEE ALSO
 
-GitHub repository: https://github.com/jesseops/gitsneak
+GitHub repository: https://github.com/motleydev/gitsneak
 
 ## AUTHOR
 

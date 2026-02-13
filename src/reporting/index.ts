@@ -1,7 +1,8 @@
 import type { CollectionResult } from '../collectors/index.js';
-import type { ReportData } from './types.js';
+import type { ReportData, AnalysisSummary, ContributorScore } from './types.js';
 import type { GitSneakOptions } from '../types/index.js';
 import { aggregateByOrganization, aggregateMultiRepo } from './aggregator.js';
+import { scoreContributor } from './scorer.js';
 import { renderOrganizationTable } from '../output/table.js';
 
 /**
@@ -37,9 +38,45 @@ export function generateReport(
   // Aggregate by organization
   const { organizations, unknown } = aggregateByOrganization(contributors);
 
+  // Build all contributors list with scores
+  const allContributors: ContributorScore[] = [];
+  for (const activity of contributors.values()) {
+    allContributors.push(scoreContributor(activity));
+  }
+  // Sort by score descending
+  allContributors.sort((a, b) => b.score - a.score);
+
+  // Calculate summary statistics
+  const summary: AnalysisSummary = {
+    totalContributors: contributors.size,
+    totalCommits: 0,
+    totalPRsAuthored: 0,
+    totalPRsReviewed: 0,
+    totalIssuesAuthored: 0,
+    totalIssuesCommented: 0,
+    affiliatedContributors: 0,
+    unaffiliatedContributors: 0,
+  };
+
+  for (const activity of contributors.values()) {
+    summary.totalCommits += activity.commits;
+    summary.totalPRsAuthored += activity.prsAuthored;
+    summary.totalPRsReviewed += activity.prsReviewed;
+    summary.totalIssuesAuthored += activity.issuesAuthored;
+    summary.totalIssuesCommented += activity.issuesCommented;
+
+    if (activity.primaryOrg) {
+      summary.affiliatedContributors++;
+    } else {
+      summary.unaffiliatedContributors++;
+    }
+  }
+
   return {
     organizations,
     unknownContributors: unknown,
+    allContributors,
+    summary,
     repos,
     generatedAt: new Date(),
   };
@@ -68,7 +105,7 @@ export function displayReport(report: ReportData, options: GitSneakOptions): voi
 }
 
 // Re-export types and functions
-export type { ReportData, OrganizationReport, ContributorScore } from './types.js';
+export type { ReportData, OrganizationReport, ContributorScore, AnalysisSummary } from './types.js';
 export { CONTRIBUTION_WEIGHTS, calculateScore, scoreContributor } from './scorer.js';
 export { aggregateByOrganization, aggregateMultiRepo } from './aggregator.js';
 export { renderOrganizationTable } from '../output/table.js';
