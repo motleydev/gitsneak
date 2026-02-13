@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Build man page
+        run: npm run build:man
+
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  update-tap:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: jesseops/homebrew-gitsneak
+          token: ${{ secrets.TAP_GITHUB_TOKEN }}
+          path: homebrew-tap
+
+      - name: Update formula
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          TARBALL_URL="https://registry.npmjs.org/gitsneak/-/gitsneak-${VERSION}.tgz"
+
+          # Wait for npm to propagate
+          sleep 30
+
+          # Download and calculate SHA256
+          SHA256=$(curl -sL "$TARBALL_URL" | shasum -a 256 | cut -d' ' -f1)
+
+          # Update formula
+          cd homebrew-tap
+          mkdir -p Formula
+
+          # Copy template and substitute values
+          sed -e "s|VERSION|${VERSION}|g" \
+              -e "s|SHA256_PLACEHOLDER|${SHA256}|g" \
+              ../support/homebrew-formula.rb > Formula/gitsneak.rb
+
+          # Commit and push
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add Formula/gitsneak.rb
+          git commit -m "gitsneak ${VERSION}"
+          git push
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
