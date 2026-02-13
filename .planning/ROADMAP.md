@@ -98,7 +98,7 @@ Plans:
 Plans:
 - [ ] 05-01-PLAN.md — Justfile with build, test, lint, clean, and release recipes
 - [ ] 05-02-PLAN.md — Enhanced --help output, man page generation with marked-man
-- [ ] 05-03-PLAN.md — Standalone binary with pkg, Homebrew tap and formula, GitHub Actions automation
+- [ ] 05-03-PLAN.md — Homebrew tap with formula, GitHub Actions CI and release automation
 
 ## Progress
 
