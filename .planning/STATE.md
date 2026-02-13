@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-11)
 ## Current Position
 
 Phase: 5 of 5 (Packaging & Distribution)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: Executing
-Last activity: 2026-02-13 - Completed 05-01 justfile automation
+Last activity: 2026-02-13 - Completed 05-02 documentation and help
 
-Progress: [########--] 83% (10/12 plans)
+Progress: [#########-] 92% (11/12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: 4 min
-- Total execution time: 0.62 hours
+- Total execution time: 0.65 hours
 
 **By Phase:**
 
@@ -31,10 +31,10 @@ Progress: [########--] 83% (10/12 plans)
 | 02-data-collection | 3 | 9 min | 3 min |
 | 03-organization-intelligence | 2 | 8 min | 4 min |
 | 04-output-reporting | 2 | 9 min | 4.5 min |
-| 05-packaging-distribution | 1 | 1 min | 1 min |
+| 05-packaging-distribution | 2 | 3 min | 1.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (4 min), 03-02 (4 min), 04-01 (4 min), 04-02 (5 min), 05-01 (1 min)
+- Last 5 plans: 03-02 (4 min), 04-01 (4 min), 04-02 (5 min), 05-01 (1 min), 05-02 (2 min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -70,6 +70,9 @@ Recent decisions affecting current work:
 - Contribution weights: prAuthored=3, prReviewed=2, commit=1, issueAuthored=1, issueCommented=0.5
 - Top 15 organizations displayed by default, unaffiliated shown separately
 - Used just instead of make for cross-platform build automation
+- addHelpText('after', ...) for CLI sections below auto-generated options
+- Man page in marked-man markdown format for maintainability
+- prepublishOnly ensures man page always in npm package
 
 ### Pending Todos
 
@@ -83,5 +86,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Completed 05-01-PLAN.md
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None
