@@ -131,43 +131,49 @@ export class CommitCollector implements Collector {
    * Find commit elements in the page using multiple selector strategies
    */
   private findCommitElements($: cheerio.CheerioAPI): Element[] {
-    // Strategy 1: data-testid="commit-row-item" (current GitHub as of 2025)
+    // Strategy 1: data-testid="commit-row-item" (GitHub 2025+, most reliable)
     let commits = $('[data-testid="commit-row-item"]').toArray();
     if (commits.length > 0) {
       return commits;
     }
 
-    // Strategy 2: data-testid="commit-row" (older modern GitHub)
+    // Strategy 2: Elements containing author links with "commits by" aria-label
+    commits = $('li:has(a[aria-label^="commits by "])').toArray();
+    if (commits.length > 0) {
+      return commits;
+    }
+
+    // Strategy 3: data-testid="commit-row"
     commits = $('[data-testid="commit-row"]').toArray();
     if (commits.length > 0) {
       return commits;
     }
 
-    // Strategy 3: TimelineItem pattern (GitHub timeline)
+    // Strategy 5: TimelineItem pattern (GitHub timeline)
     commits = $('.TimelineItem').toArray();
     if (commits.length > 0) {
       return commits;
     }
 
-    // Strategy 4: commits-list-item (older GitHub)
+    // Strategy 6: commits-list-item (older GitHub)
     commits = $('[data-commits-list-item]').toArray();
     if (commits.length > 0) {
       return commits;
     }
 
-    // Strategy 5: BlobCodeContent or commit row divs
+    // Strategy 7: BlobCodeContent or commit row divs
     commits = $('div.commit').toArray();
     if (commits.length > 0) {
       return commits;
     }
 
-    // Strategy 6: Look for commit containers with author links
+    // Strategy 8: Look for commit containers with author links
     commits = $('li:has(a[data-hovercard-type="user"])').toArray();
     if (commits.length > 0) {
       return commits;
     }
 
-    // Strategy 7: Generic - find all elements containing commit author info
+    // Strategy 9: Generic - find all elements containing commit author info
     commits = $('div:has(relative-time):has(a[href^="/"]:not([href*="commit"]))').toArray();
 
     if (this.verbose && commits.length === 0) {
@@ -225,7 +231,21 @@ export class CommitCollector implements Collector {
       }
     }
 
-    // Strategy 4: Look for user profile link by href pattern
+    // Strategy 4: aria-label="commits by USERNAME" (GitHub 2025+ design)
+    if (!username) {
+      const ariaLink = $el.find('a[aria-label^="commits by "]').first();
+      if (ariaLink.length > 0) {
+        const ariaLabel = ariaLink.attr('aria-label');
+        if (ariaLabel) {
+          const match = ariaLabel.match(/^commits by (.+)$/);
+          if (match) {
+            username = match[1];
+          }
+        }
+      }
+    }
+
+    // Strategy 5: Look for user profile link by href pattern
     if (!username) {
       $el.find('a').each((_, linkEl) => {
         const href = $(linkEl).attr('href');

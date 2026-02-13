@@ -4,21 +4,31 @@ const GITHUB_BASE = 'https://github.com';
 
 /**
  * Extract cursor-based pagination URL (for commits)
- * GitHub commits use "Older" / "Newer" links with cursor parameters
+ * GitHub commits use cursor parameters with ?after= or ?before=
  */
 export function extractCursorPagination($: cheerio.CheerioAPI): string | null {
-  // Look for "Older" link in pagination
-  // GitHub uses various selectors, try multiple approaches
+  // Strategy 1: data-testid="pagination-next-button" (GitHub 2025+ design)
+  const nextButton = $('a[data-testid="pagination-next-button"]').attr('href');
+  if (nextButton) {
+    return nextButton.startsWith('http') ? nextButton : `${GITHUB_BASE}${nextButton}`;
+  }
+
+  // Strategy 2: Look for links with ?after= cursor parameter
+  const afterLink = $('a[href*="?after="], a[href*="&after="]').first().attr('href');
+  if (afterLink) {
+    return afterLink.startsWith('http') ? afterLink : `${GITHUB_BASE}${afterLink}`;
+  }
+
+  // Strategy 3: Look for "Older" link in pagination (legacy)
   const olderLink = $('a[rel="nofollow"]')
     .filter((_, el) => $(el).text().trim().toLowerCase().includes('older'))
     .attr('href');
 
   if (olderLink) {
-    // Ensure full URL
     return olderLink.startsWith('http') ? olderLink : `${GITHUB_BASE}${olderLink}`;
   }
 
-  // Alternative: look for pagination container with "Older" text
+  // Strategy 4: Alternative - look for pagination container with "Older" text (legacy)
   const paginationOlder = $('a')
     .filter((_, el) => {
       const text = $(el).text().trim().toLowerCase();
