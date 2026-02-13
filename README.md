@@ -1,68 +1,108 @@
 # gitsneak
 
-Analyze organizational involvement in GitHub repositories and pull requests.
+**Open source intelligence for business development.**
 
-gitsneak examines commits, pull requests, issues, and contributor profiles to identify which companies have the most investment in open source projects.
+Discover which companies are investing engineering resources in open source projects. gitsneak analyzes GitHub repositories to reveal organizational involvement—helping you identify potential partners, customers, or acquisition targets based on their open source footprint.
+
+## Why gitsneak?
+
+Companies that contribute to open source signal:
+- **Technical investment** in specific technologies
+- **Engineering capacity** and team size
+- **Strategic priorities** through sustained contribution patterns
+
+gitsneak surfaces this intelligence by analyzing commits, pull requests, code reviews, and contributor profiles to map the corporate landscape behind any GitHub project.
 
 ## Installation
 
 ```bash
-# npm
-npm install -g gitsneak
-
 # Homebrew
 brew tap motleydev/tap
 brew install gitsneak
+
+# npm
+npm install -g gitsneak
 ```
 
-## Usage
+## Quick Start
 
 ```bash
-# Analyze a repository
+# Who's contributing to React?
 gitsneak https://github.com/facebook/react
 
-# Analyze a specific pull request
-gitsneak https://github.com/facebook/react/pull/28000
+# Analyze a specific PR's participants
+gitsneak https://github.com/kubernetes/kubernetes/pull/12345
 
-# Multiple targets with HTML report
-gitsneak --html report.html https://github.com/org/repo https://github.com/org/repo/pull/123
-
-# Last 6 months, verbose output
-gitsneak -v --since 6m https://github.com/org/repo
+# Generate an interactive HTML report
+gitsneak --html report.html https://github.com/apache/kafka
 ```
 
-## Options
+## Example Output
 
-| Option | Description |
-|--------|-------------|
-| `-v, --verbose` | Show detailed output (URLs fetched, timing) |
-| `-q, --quiet` | Suppress progress, show only final output |
-| `--delay <ms>` | Delay between requests (default: 1500) |
-| `--since <date>` | Filter activity after date (e.g., `12m`, `1y`, `2025-01-01`) |
-| `--no-cache` | Bypass cache, fetch fresh data |
-| `--fail-fast` | Stop on first error |
-| `--html [path]` | Generate HTML report |
+```
+┌──────┬─────────────────────────┬───────┬──────────────┬─────────┬───────────┬─────────────┐
+│ Rank │ Organization            │ Score │ Contributors │ Commits │ PRs (A/R) │ Issues (A/C)│
+├──────┼─────────────────────────┼───────┼──────────────┼─────────┼───────────┼─────────────┤
+│ #1   │ Meta                    │ 847.2 │ 24           │ 1,892   │ 342/521   │ 89/445      │
+│ #2   │ Vercel                  │ 234.5 │ 8            │ 445     │ 122/89    │ 34/122      │
+│ #3   │ Google                  │ 198.3 │ 12           │ 234     │ 67/145    │ 23/89       │
+│ ...  │                         │       │              │         │           │             │
+└──────┴─────────────────────────┴───────┴──────────────┴─────────┴───────────┴─────────────┘
+```
 
 ## Features
 
-- Analyzes commits, PRs (authored & reviewed), and issues
-- Detects organization affiliations from profiles, emails, and org memberships
-- Scores contributions with weighted activity metrics
-- Generates interactive HTML reports with filtering and charts
-- Caches responses to minimize GitHub requests
-- Supports both repository and individual PR analysis
+- **Organization Detection** — Identifies companies from GitHub profiles, email domains, and org memberships
+- **Multi-signal Analysis** — Weighs commits, PRs authored, code reviews, and issue participation
+- **PR-level Targeting** — Analyze individual pull requests to see who's involved in specific features
+- **Interactive Reports** — Filterable HTML reports with charts and direct links to contributor profiles
+- **Smart Caching** — Respects rate limits with local caching to enable iterative analysis
+
+## Options
+
+| Flag | Description |
+|------|-------------|
+| `--html [path]` | Generate interactive HTML report |
+| `--since <date>` | Filter to recent activity (e.g., `6m`, `1y`, `2024-01-01`) |
+| `--delay <ms>` | Request delay in milliseconds (default: 1500) |
+| `--no-cache` | Bypass cache for fresh data |
+| `-v, --verbose` | Show detailed progress |
+| `-q, --quiet` | Minimal output |
+
+## Use Cases
+
+**Sales & Business Development**
+> "Which companies are using Kubernetes? Let me analyze their contributor base to build a prospect list."
+
+**Competitive Intelligence**
+> "How much is our competitor investing in this open source project compared to us?"
+
+**M&A Research**
+> "Which startups have engineers actively contributing to AI/ML frameworks?"
+
+**Partnership Discovery**
+> "Find companies with shared technology interests for potential integration partnerships."
 
 ## How Scoring Works
 
-Contributions are weighted:
-- Commit: 1 point
-- PR authored: 3 points
-- PR reviewed: 2 points
-- Issue authored: 1 point
-- Issue comment: 0.5 points
+Contributions are weighted by effort:
 
-Scores use logarithmic scaling to prevent high-volume contributors from dominating.
+| Activity | Weight |
+|----------|--------|
+| PR Authored | 3 |
+| PR Reviewed | 2 |
+| Commit | 1 |
+| Issue Authored | 1 |
+| Issue Comment | 0.5 |
+
+Scores use logarithmic scaling to balance prolific individuals against broader team participation.
 
 ## License
 
 MIT
+
+---
+
+<p align="center">
+  <sub>Built for discovering the companies behind open source.</sub>
+</p>
